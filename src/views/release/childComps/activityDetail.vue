@@ -1,8 +1,8 @@
 <!--
  * @Author: angula
  * @Date: 2020-07-30 18:04:48
- * @LastEditTime: 2020-08-02 16:58:23
- * @FilePath: \working\vue-cli3 demo\src\views\release\childComps\activityDetail.vue
+ * @LastEditTime: 2020-08-05 12:23:47
+ * @FilePath: \working\Appointment\src\views\release\childComps\activityDetail.vue
 -->
 <template>
   <div>
@@ -15,16 +15,16 @@
       />
     </van-cell-group>-->
     <HeadTop head-title="活动详情" go-back="true"></HeadTop>
-    <h2 class="item-news">活动信息</h2>
+    <h2 class="item-news">活动亮点</h2>
     <div class="item">
       <van-field
         class="item-van"
-        v-model="message_new"
-        rows="2"
+        v-model="bright_spot"
+        rows="3"
         autosize
         type="textarea"
         maxlength="150"
-        placeholder="请填写活动亮点，便于分享或推荐活动，不超过150字"
+        :placeholder="text.value_news"
         show-word-limit
       />
     </div>
@@ -33,22 +33,24 @@
       <van-field
         class="item-content"
         size="large"
-        v-model="message_content"
-        rows="2"
+        v-model="content"
+        rows="9"
         input-align="left"
         autosize
         type="textarea"
-        placeholder="请填写活动详情介绍，不得出现微信号以及手机号"
+        :placeholder="text.value_content"
       />
     </div>
     <div class="item-button">
-      <span @click="check" class="check">确定</span>
+      <span @click="issave" class="check">确定</span>
     </div>
   </div>
 </template>
 
 <script>
 import HeadTop from "@/components/header/Head";
+import { mapState } from "vuex";
+
 import Vue from "vue";
 import { Toast } from "vant";
 
@@ -57,32 +59,43 @@ export default {
   name: "activityDetail",
   data() {
     return {
-      // text: "请完善>",
-      value: "",
-      message_new: "",
-      message_content: ""
+      bright_spot: null,
+      content: null,
+      text: {
+        value_news: "请填写几句活动亮点，便于分享和推荐活动。",
+        value_content: "填写活动详细介绍，不得出现微信等联系方式"
+      }
     };
   },
   methods: {
-    check() {
-      // console.log("over");
-      console.log(this.message_new);
-      console.log(this.message_content);
+    issave() {
+      // 保存
+
       // 对内容进行过滤，不允许出现手机号和微信号，qq号
       // 正则表达式
       let reg = new RegExp(
         "(微信|QQ|qq|weixin|1[0-9]{10}|[a-zA-Z0-9-_]{6,16}|[0-9]{6,11})+",
         "g"
       );
-      if (this.message_new == "") {
+      if (this.bright_spot == "") {
         Toast("活动信息不得为空");
-      } else if (this.message_content == "") {
+      } else if (this.content == "") {
         Toast("活动内容不得为空");
-      } else if (reg.test(this.message_content)) {
+      } else if (reg.test(this.content)) {
         Toast("不允许出现手机号，微信号，qq号等隐私");
       } else {
+        //保存
+        this.$store.commit("release/save_datail", {
+          bright_spot: this.bright_spot,
+          content: this.content
+        });
+        //返回上一级
         this.$router.go(-1);
       }
+    },
+    data_Initialize() {
+      this.bright_spot = this.activity_data.bright_spot;
+      this.content = this.activity_data.content;
     }
   },
   props: {},
@@ -90,9 +103,15 @@ export default {
     HeadTop
   },
   watch: {},
-  computed: {},
+  computed: {
+    ...mapState({
+      activity_data: state => state.release.activity_data
+    })
+  },
   created() {},
-  mounted() {}
+  mounted() {
+    this.data_Initialize();
+  }
 };
 </script>
 <style scoped>

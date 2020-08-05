@@ -1,210 +1,160 @@
 <!--
  * @Author: angula
- * @Date: 2020-07-31 00:12:31
- * @LastEditTime: 2020-08-02 15:57:53
- * @FilePath: \working\vue-cli3 demo\src\views\release\childComps\activityAddress.vue
+ * @Date: 2020-07-30 18:23:12
+ * @LastEditTime: 2020-08-05 16:16:50
+ * @FilePath: \working\Appointment\src\views\release\childComps\activityAddress.vue
 -->
 <template>
-  <keep-alive>
-    <div>
-      <!-- 顶部 -->
-      <HeadTop head-title="活动地址" go-back="true"></HeadTop>
-      <!-- 主体 -->
-      <div class="item-main">
-        <van-cell title="形式">
-          <van-radio-group v-model="radio" direction="horizontal">
-            <van-radio name="1">
-              线下
-              <template #icon="props">
-                <img class="img-icon" :src="props.checked ? activeIcon : inactiveIcon" />
-              </template>
-            </van-radio>
-            <van-radio name="2">
-              线上
-              <template #icon="props">
-                <img class="img-icon" :src="props.checked ? activeIcon : inactiveIcon" />
-              </template>
-            </van-radio>
+  <div>
+    <HeadTop head-title="发布活动" go-back="true"></HeadTop>
+    <div class="main">
+      <van-cell title="形式">
+        <template #default>
+          <van-radio-group v-model="address.type" direction="horizontal">
+            <van-radio name="1" icon-size="14px">线上</van-radio>
+            <van-radio name="2" icon-size="14px">线下</van-radio>
           </van-radio-group>
-        </van-cell>
-        <!-- 城市 -->
+        </template>
+      </van-cell>
+      <div v-if="address.type == '2'">
         <van-field
+          is-link
           readonly
-          name="area"
-          :value="value"
-          v-if="!isOnline"
-          input-align="right"
+          clickable
           label="城市"
-          @click="cityShow = true"
-          placeholder="待选择>"
+          :value="address.cityList"
+          input-align="right"
+          placeholder="请选择"
+          @click="showPicker = true"
+          left-icon="orders-o"
         />
-        <van-popup v-model="cityShow" position="bottom" :style="{ height: '60%' }">
-          <van-area :area-list="areaList" @confirm="onConfirm" @cancel="cityShow = false" />
-        </van-popup>
-        <!-- 详细地址 -->
-
-        <van-cell-group>
-          <van-field
-            v-model="value_address"
-            v-if="!isOnline"
-            label="详细地址"
-            input-align="right"
-            placeholder="请输入详细地址"
+        <van-popup v-model="showPicker" position="bottom">
+          <van-picker
+            show-toolbar
+            :columns="cityListPlus"
+            @cancel="showPicker = false"
+            @confirm="onConfirm"
+            :default-index="0"
           />
-        </van-cell-group>
+        </van-popup>
+        <van-field
+          v-model="address.cityList_text"
+          label="详细地址"
+          :autofocus="true"
+          placeholder="详细"
+          input-align="right"
+          left-icon="label-o"
+          maxlength="32"
+        />
       </div>
-      <!-- 确定按钮 -->
-      <div class="item-button">
-        <span @click="check" class="check">确定</span>
+      <div v-else>
+        <!-- 线上 -->
+      </div>
+      <div class="top">
+        <van-button type="dark" block to="/u/release" @click="issave">确定</van-button>
+        <van-cell center title="说明" :label="text" class="top-2" />
       </div>
     </div>
-  </keep-alive>
+  </div>
 </template>
 
 <script>
 import HeadTop from "@/components/header/Head";
+import { mapState } from "vuex";
 
-import Vue from "vue";
-import { Toast } from "vant";
-
-Vue.use(Toast);
 export default {
-  name: "activityAddress",
-  data() {
-    return {
-      value: "",
-      value_address: "",
-      showArea: "",
-      radio: 1,
-      // 是否线上，用于判断是否显示组件
-      isOnline: false,
-      cityShow: false,
-      // 图标
-      activeIcon: require("../../../assets/img/releaseImg/activeRound.png"),
-      inactiveIcon: require("../../../assets/img/releaseImg/inactiveRound.png"),
-      // 城市
-      areaList: {
-        province_list: {
-          110000: "北京市",
-          120000: "天津市"
-        },
-        city_list: {
-          110100: "北京市",
-          110200: "县",
-          120100: "天津市",
-          120200: "县"
-        },
-        county_list: {
-          110101: "东城区",
-          110102: "西城区",
-          110105: "朝阳区",
-          110106: "丰台区",
-          120101: "和平区",
-          120102: "河东区",
-          120103: "河西区",
-          120104: "南开区"
-        }
-      }
-    };
-  },
-  methods: {
-    showCityPopup() {
-      this.cityShow = true;
-    },
-    onConfirm(value, index) {
-      // console.log({ 当前值: value, 当前索引: index });
-      this.value = value.map(item => item.name).join("-");
-      this.cityShow = false;
-    },
-    onCancel(value, index) {
-      console.log(value, index);
-      this.cityShow = false;
-    },
-    check() {
-      console.log("over");
-      console.log(this.value);
-      console.log(this.value_address);
-      if (!this.isOnline) {
-        if (this.value == "") {
-          Toast("活动地址不得为空");
-        } else if (this.value_address == "") {
-          Toast("详细地址不得为空");
-        } else {
-          this.$router.go(-1);
-        }
-      } else {
-        this.$router.go(-1);
-      }
-    }
-  },
-  props: {},
   components: {
     HeadTop
   },
-  watch: {
-    radio(newValue) {
-      if (newValue == "1") {
-        this.isOnline = false;
-      } else {
-        this.isOnline = true;
+  data() {
+    return {
+      text: "请根据情况自行选择，线上或者线下，若为线下活动，请注意自身安全",
+      // 原始未处理的数据 - 分类列表，城市列表
+      original: {
+        cityList: []
+      },
+      showPicker: false,
+      address: {
+        type: "2",
+        cityList: "", // 城市
+        cityList_id: null, // 城市ID
+        cityList_text: "" // 地址详细
+      }
+    };
+  },
+  computed: {
+    // 赋值
+    ...mapState({
+      activity_data: state => state.release.activity_data
+    }),
+    // 活动地址
+    cityListPlus: {
+      get: function() {
+        let value = this.original.cityList;
+        for (var i = 0; i < value.length; i++) {
+          value[i].text = value[i].name;
+        }
+        return value;
       }
     }
   },
-  computed: {},
-  created() {},
-  mounted() {}
+  methods: {
+    // 保存
+    issave() {
+      let value = this.address;
+      if (value.type === "A") {
+        value = [];
+        value.type = "A";
+      }
+      this.$store.commit("release/save_address", value);
+    },
+    // 数据初始化
+    data_Initialize() {
+      var _this = this;
+      this.$get(this.$api.active_data_Initialize)
+        .then(function(res) {
+          if (res.success === true) {
+            _this.original.cityList = res.data.cityList;
+          } else {
+            console.log(res.msg);
+          }
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    },
+    // 弹出层 - 活动地址 - 确定
+    onConfirm(value) {
+      this.showPicker = false;
+      if (value.id != 0) {
+        this.address.cityList_id = value.id;
+        this.address.cityList = value.text;
+      }
+    },
+    // 缓存值
+    cache_value() {
+      this.address.cityList = this.activity_data.address.cityList;
+      this.address.cityList_id = this.activity_data.address.cityList_id;
+      this.address.cityList_text = this.activity_data.address.cityList_text;
+    }
+  },
+  mounted() {
+    this.data_Initialize();
+    this.cache_value();
+  }
 };
 </script>
-<style >
-.item-line {
-  height: 34px;
-  background-color: white;
-  border-bottom: solid rgba(187, 186, 186, 0.204) 1px;
-}
-.img-icon {
-  height: 20px;
-}
-.item-main {
-  margin-top: 10px;
-  padding: 15px 10px;
-  text-align: left;
-}
-.van-cell {
-  margin-top: 2px;
-}
-.van-cell__title {
-  flex: 1;
-}
-.van-cell__value {
-  margin-left: 100px;
-  /* font-size: 10px; */
-  flex: 2;
-}
-input {
-  border: none;
-  text-align: right;
-  outline: none;
-}
 
-.item-button {
-  width: 160px;
-  height: 45px;
-  border-radius: 10px;
-  background-color: #ffb04f;
-  position: absolute;
-  margin-top: 100px;
-  margin-left: 110px;
+<style>
+.main {
+  margin-right: 1vh;
+  margin-left: 1vh;
+  margin-top: 1vh;
 }
-.check {
-  display: block;
-  width: 160px;
-  height: 20px;
-  font-size: 25px;
-  font-family: Alibaba PuHuiTi Regular, Alibaba PuHuiTi Regular-Regular;
-  font-weight: bold;
-  text-align: center;
-  color: #ffffff;
-  line-height: 48px;
-  letter-spacing: 3px;
+.top {
+  margin-top: 5vh;
+}
+.top-2 {
+  margin-top: 2vh;
 }
 </style>

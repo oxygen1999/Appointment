@@ -1,31 +1,16 @@
 <!--
  * @Author: angula
  * @Date: 2020-07-30 18:48:39
- * @LastEditTime: 2020-08-02 16:47:34
- * @FilePath: \working\vue-cli3 demo\src\views\release\childComps\activityParticipants.vue
+ * @LastEditTime: 2020-08-05 15:55:20
+ * @FilePath: \working\Appointment\src\views\release\childComps\activityParticipants.vue
 -->
 <template>
   <div>
     <HeadTop head-title="活动人数" go-back="true"></HeadTop>
-    <!-- <van-cell title="单元格" is-link value="内容" /> -->
-    <!-- <van-cell-group>
-      <van-field
-        v-model="value_min"
-        label="最少人数"
-        placeholder="请输入"
-        input-align="right"
-      />
-      <van-field
-        v-model="value_max"
-        label="最多人数"
-        placeholder="请输入"
-        input-align="right"
-      />
-    </van-cell-group>-->
     <van-form validate-first @failed="onFailed">
       <van-field
         class="van-ellipsis"
-        v-model="value_min"
+        v-model="amount.min"
         name="pattern"
         label="最少人数"
         placeholder="请输入"
@@ -36,7 +21,7 @@
     <van-form validate-first @failed="onFailed">
       <van-field
         class="van-ellipsis"
-        v-model="value_max"
+        v-model="amount.max"
         name="pattern"
         label="最多人数"
         placeholder="请输入"
@@ -45,7 +30,7 @@
       />
     </van-form>
     <div class="item-button">
-      <span @click="check" class="check">确 定</span>
+      <span @click="issave" class="check">确 定</span>
     </div>
 
     <!-- 说明 -->
@@ -61,16 +46,18 @@
 <script>
 import Vue from "vue";
 import { Toast } from "vant";
-
 Vue.use(Toast);
+
+import { mapState } from "vuex";
 import HeadTop from "@/components/header/Head";
-import fix from "@/components/common/fix";
 export default {
   name: "activityParticipants",
   data() {
     return {
-      value_min: "",
-      value_max: "",
+      amount: {
+        min: "",
+        max: ""
+      },
       pattern: /^\d+$|^\d+[.]?\d+$/
     };
   },
@@ -82,25 +69,41 @@ export default {
     onFailed(errorInfo) {
       console.log("failed", errorInfo);
     },
-    check() {
-      if (this.value_min == "") {
+    issave() {
+      if (this.amount.min == "") {
         Toast("最少人数不能为空");
-      } else if (this.value_max == "") {
+      } else if (this.amount.max == "") {
         Toast("最多人数不得为空");
       } else {
+        //保存
+        this.$store.commit("release/save_amount", {
+          min: this.amount.min,
+          max: this.amount.max
+        });
         this.$router.go(-1);
       }
+    },
+    // 初始化赋值
+    data_Initialize() {
+      let amount = this.activity_data.amount;
+      this.amount.min = amount.min;
+      this.amount.max = amount.max;
     }
   },
   props: {},
   components: {
-    HeadTop,
-    fix
+    HeadTop
   },
   watch: {},
-  computed: {},
+  computed: {
+    ...mapState({
+      activity_data: state => state.release.activity_data
+    })
+  },
   created() {},
-  mounted() {}
+  mounted() {
+    this.data_Initialize();
+  }
 };
 </script>
 <style scoped>

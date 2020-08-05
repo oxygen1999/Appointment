@@ -1,8 +1,8 @@
 <!--
  * @Author: angula
  * @Date: 2020-07-29 17:37:39
- * @LastEditTime: 2020-08-02 17:36:30
- * @FilePath: \working\vue-cli3 demo\src\views\release\release.vue
+ * @LastEditTime: 2020-08-05 17:35:25
+ * @FilePath: \working\Appointment\src\views\release\release.vue
 -->
 <template>
   <div>
@@ -16,7 +16,7 @@
         <!-- 通过 pattern 进行正则校验 -->
         <van-field
           class="van-ellipsis"
-          v-model="value1"
+          v-model="title"
           left-icon="label-o"
           name="pattern"
           label="活动标题"
@@ -31,8 +31,7 @@
         title="活动详情"
         icon="more-o"
         ref="test"
-        :value="value_detail"
-        @click="detailClick"
+        :value="this.activity_data.bright_spot && this.activity_data.content ?'已完善':'待完善'"
         is-link
         to="/u/release/detail"
       />
@@ -49,8 +48,7 @@
       <van-cell
         icon="friends-o"
         title="活动人数"
-        @click="numberClick"
-        :value="value_participants"
+        :value="this.activity_data.amount.min && this.activity_data.amount.max ? '已完善':'待完善'"
         is-link
         to="/u/release/participants"
       />
@@ -58,8 +56,7 @@
       <van-cell
         icon="clock-o"
         title="活动时间"
-        :value="value_time"
-        @click="timeClick"
+        :value="this.activity_data.time.start && this.activity_data.time.end?'已完善':'待完善'"
         is-link
         to="/u/release/activityTime"
       />
@@ -67,15 +64,14 @@
       <van-cell
         icon="location-o"
         title="活动地址"
-        :value="value_address"
-        @click="addressClick"
+        :value="this.activity_data.address.type == 'A' || this.activity_data.address.cityList_id ? '已完善':'待完善'"
         is-link
         to="/u/release/activityAddress"
       />
       <!-- 其他说明 -->
       <van-cell-group>
         <van-field
-          v-model="value_other"
+          v-model="activity_data.value_other"
           label="其他说明"
           left-icon="warning-o"
           input-align="right"
@@ -85,7 +81,7 @@
     </div>
     <a href="#">查看活动审核规则</a>
     <center>
-      <van-button class="btn" round type="info" color>确认发布</van-button>
+      <van-button @click="release" class="btn" round type="info" color>确认发布</van-button>
     </center>
   </div>
 </template>
@@ -93,19 +89,15 @@
 <script>
 import HeadTop from "@/components/header/Head";
 import activityType from "../release/childComps/activityType";
-// import activityDetail from "../release/childComps/activityDetail";
 import activityImage from "../release/childComps/activityImage";
 
+import { mapState } from "vuex";
 export default {
   name: "release",
   data() {
     return {
-      value_detail: "待完善",
-      value_participants: "待设置",
-      value_time: "待设置",
-      value_address: "待设置",
-      value1: "",
-      value_other: "",
+      title: "",
+      value_other: "", //其他
       pattern: /^[\u4e00-\u9fa5\w]{1,20}$/
     };
   },
@@ -117,21 +109,45 @@ export default {
     onFailed(errorInfo) {
       console.log("failed", errorInfo);
     },
-    detailClick() {
-      this.value_detail = "已完善";
-      // console.log(this.value_detail);
+    cache_value() {
+      this.title = this.activity_data.title;
     },
-    numberClick() {
-      this.value_participants = "已设置";
-      // console.log(this.value_participants);
+    //发布活动前进行数据格式化
+    prepare(value) {
+      let img;
+      let file = value.fileList;
+      // t图片
+      for (let i = 0; i < file.length; i++) {
+        img += ".." + file[i].content;
+      }
+
+      // 赋值
+      let data = {
+        title: value.title, //标题
+        catagoryId: value.classification_id, //分类id
+        publishUserId: 1, //
+        content: value.content,
+        images: img,
+        cityId: value.address.cityList_id,
+        addressMode: value.address.type,
+        address: value.address.cityList_text,
+        beginTime: value.time.start,
+        endTime: value.time.end,
+        leaseJoinNum: value.amount.min,
+        mostJoinNum: value.amount.max,
+        remark: value.value_other
+      };
+      return data;
     },
-    timeClick() {
-      // console.log(value_min);
-      this.value_time = "已设置";
-      // console.log(this.value_time);
-    },
-    addressClick() {
-      this.value_address = "已设置";
+
+    // 活动发布
+    release() {
+      let value = this.activity_data;
+      value = this.prepare(value);
+      console.log(value);
+      this.$post(this.$api.active_info_submit, value).then(res => {
+        console.log(res);
+      });
     }
   },
   props: {},
@@ -142,15 +158,25 @@ export default {
     activityImage
   },
   watch: {
-    // this.$refs.test.value = '已设置'
-    // message_new: function(val) {
-    //   // this.fullName = val + " " + this.lastName;
-    //   this.$refs.test.test = "已设置";
-    // }
+    // 标题
+    title(value = this.title) {
+      this.$store.commit("release/save_title", value);
+    },
+    // 其他
+    value_other(value = this.value_other) {
+      this.$store.commit("release/save_text", value);
+    }
   },
-  computed: {},
+  computed: {
+    ...mapState({
+      activity_data: state => state.release.activity_data,
+      classification: state => state.release.classification
+    })
+  },
   created() {},
-  mounted() {}
+  mounted() {
+    this.cache_value();
+  }
 };
 </script>
 <style>

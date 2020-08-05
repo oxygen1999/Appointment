@@ -1,12 +1,12 @@
 <!--
  * @Author: angula
  * @Date: 2020-07-23 10:48:11
- * @LastEditTime: 2020-08-01 16:31:26
- * @FilePath: \working\vue-cli3 demo\src\views\Index.vue
+ * @LastEditTime: 2020-08-05 17:57:46
+ * @FilePath: \working\Appointment\src\views\Index.vue
 -->
 <template>
   <div>
-    <HeadTop head-title="在线实习" go-back="true"></HeadTop>
+    <HeadTop head-title="约起来" go-back="true"></HeadTop>
     <div>
       <router-link to="/">返回首页</router-link>
     </div>

@@ -1,8 +1,8 @@
 /*
  * @Author: angula
  * @Date: 2020-07-23 10:48:11
- * @LastEditTime: 2020-08-01 10:19:01
- * @FilePath: \working\vue-cli3 demo\src\main.js
+ * @LastEditTime: 2020-08-05 10:47:27
+ * @FilePath: \working\Appointment\src\main.js
  */
 import Vue from 'vue'
 import './plugins/axios'
@@ -57,6 +57,16 @@ Vue.use(Area);
 Vue.use(Radio);
 Vue.use(RadioGroup);
 
+
+
+
+import { post, get } from './plugins/http.js'
+import { api } from './plugins/api.js';   //接口
+
+// 定义为全局变量
+Vue.prototype.$api = api;
+Vue.prototype.$get = get;
+Vue.prototype.$post = post;
 
 Vue.config.productionTip = false
 

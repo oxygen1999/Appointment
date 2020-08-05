@@ -1,8 +1,8 @@
 /*
  * @Author: angula
  * @Date: 2020-07-23 10:48:11
- * @LastEditTime: 2020-08-01 19:02:03
- * @FilePath: \working\vue-cli3 demo\src\router\index.js
+ * @LastEditTime: 2020-08-04 16:48:59
+ * @FilePath: \working\Appointment\src\router\index.js
  */
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -26,7 +26,7 @@ const routes = [
     path: '/', component: App, //顶层路由，对应index.html
     children: [ //二级路由。对应App.vue
       { path: '', redirect: '/index' },
-      { path: '/index', component: Index, meta: { title: "在线实习" } },
+      { path: '/index', component: Index, meta: { title: "约起来" } },
       { path: '/u/login', component: login, meta: { title: "登录" } },
       { path: '/u/bindMobile', component: bindMobile, meta: { title: "绑定手机" } },
       { path: '/u/release', component: release, meta: { title: "发布", keepAlive: true } },

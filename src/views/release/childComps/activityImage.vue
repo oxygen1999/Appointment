@@ -1,8 +1,8 @@
 <!--
  * @Author: angula
  * @Date: 2020-07-30 18:23:12
- * @LastEditTime: 2020-08-01 15:53:28
- * @FilePath: \working\vue-cli3 demo\src\views\release\childComps\activityImage.vue
+ * @LastEditTime: 2020-08-05 15:32:02
+ * @FilePath: \working\Appointment\src\views\release\childComps\activityImage.vue
 -->
 <template>
   <div>
@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
   name: "activityImage",
   data() {
@@ -22,13 +24,28 @@ export default {
       fileList: []
     };
   },
-  methods: {},
+  methods: {
+    cache_value() {
+      this.fileList = this.activity_data.fileList;
+    }
+  },
   props: {},
   components: {},
-  watch: {},
-  computed: {},
+  watch: {
+    //图片更新
+    fileList(value = this.fileList) {
+      this.$store.commit("release/save_img", value);
+    }
+  },
+  computed: {
+    ...mapState({
+      activity_data: state => state.release.activity_data
+    })
+  },
   created() {},
-  mounted() {}
+  mounted() {
+    this.cache_value();
+  }
 };
 </script>
 <style scoped>
